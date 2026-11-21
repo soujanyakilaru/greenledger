@@ -2,7 +2,8 @@
 month, source, resource_id, tool, department, location, unit, quantity, cost_chf
 """
 import pandas as pd, json, sys, os
-D = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), '..', 'repo')
+from config import DATA_DIR
+D = sys.argv[1] if len(sys.argv) > 1 else DATA_DIR
 r = lambda f: pd.read_csv(os.path.join(D, f), encoding='utf-8-sig')
 fx = r('exchange_rates.csv'); fx['month'] = pd.to_datetime(fx.month)
 fx = fx.set_index('month')

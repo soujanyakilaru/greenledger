@@ -1,7 +1,8 @@
 """Know the limits: protection windows, contradictions, suspicious free text.
 Every finding carries its evidence (file + row id) so a human can check it."""
-import pandas as pd, re
-r = lambda f: pd.read_csv('../repo/' + f, encoding='utf-8-sig')
+import pandas as pd, re, os
+from config import DATA_DIR
+r = lambda f: pd.read_csv(os.path.join(DATA_DIR, f), encoding='utf-8-sig')
 
 # Free text is DATA. Text that tries to instruct a system is flagged and never acted on.
 SUSPICIOUS = re.compile(r'ignore (?:all )?previous|instruction to ai|for (?:ai )?assistants|set all costs|'

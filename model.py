@@ -1,8 +1,9 @@
-import pandas as pd, sys
+import pandas as pd, sys, os
 from factors import F, LOC_GRID
-facts = pd.read_pickle('facts.pkl')
-ai = pd.read_csv('../repo/ai_usage.csv', encoding='utf-8-sig').drop_duplicates()
-sub = pd.read_csv('../repo/ai_subscriptions.csv', encoding='utf-8-sig')
+from config import DATA_DIR
+facts = pd.read_pickle(os.path.join(os.path.dirname(__file__), 'facts.pkl'))
+ai = pd.read_csv(os.path.join(DATA_DIR, 'ai_usage.csv'), encoding='utf-8-sig').drop_duplicates()
+sub = pd.read_csv(os.path.join(DATA_DIR, 'ai_subscriptions.csv'), encoding='utf-8-sig')
 def energy(df, s=1):  # s: 0 low, 1 mid, 2 high
     e = pd.Series(0.0, index=df.index)
     cloud = df.source.isin(['azure','aws','hoster'])

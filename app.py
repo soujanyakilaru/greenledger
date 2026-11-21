@@ -1,8 +1,9 @@
 """GreenLedger: the three-currency ledger (CHF, kWh, kg CO2) for an SME's digital services.
 Run:  streamlit run app.py"""
-import streamlit as st, pandas as pd, plotly.express as px
+import streamlit as st, pandas as pd, plotly.express as px, os
 import model, package, guardrails
 from factors import F
+from config import DATA_DIR
 
 st.set_page_config(page_title='GreenLedger', layout='wide')
 scen = st.sidebar.radio('Factor scenario', ['low', 'mid', 'high'], index=1,
@@ -75,16 +76,16 @@ with t2:
     st.dataframe(pd.DataFrame(recs), width='stretch')
     st.divider()
     st.markdown('**Supporting evidence**')
-    dp = pd.read_csv('../repo/data_platform_usage.csv', encoding='utf-8-sig')
+    dp = pd.read_csv(os.path.join(DATA_DIR, 'data_platform_usage.csv'), encoding='utf-8-sig')
     dp = dp[(dp.date >= '2025-09-01') & (dp.date < '2026-09-01')].groupby('resource_id')[['runtime_h', 'active_use_h']].sum()
     dp['idle %'] = (100 - dp.active_use_h / dp.runtime_h * 100).round(0)
     st.markdown('**Data platform utilisation** (`data_platform_usage.csv`)')
     st.dataframe(dp)
-    sm = pd.read_csv('../repo/server_metrics_weekly.csv', encoding='utf-8-sig')
+    sm = pd.read_csv(os.path.join(DATA_DIR, 'server_metrics_weekly.csv'), encoding='utf-8-sig')
     g = sm[sm.server_id == 'gpu-ml-01']
     st.markdown('**GPU server weekly utilisation** (`server_metrics_weekly.csv`)')
     st.plotly_chart(px.line(g, x='week_start', y='gpu_avg_pct'), width='stretch')
-    sub = pd.read_csv('../repo/ai_subscriptions.csv', encoding='utf-8-sig')
+    sub = pd.read_csv(os.path.join(DATA_DIR, 'ai_subscriptions.csv'), encoding='utf-8-sig')
     a = sub[(sub.month == '2026-08-01') & (sub.contract_status == 'Final')].groupby('product')[['licences_purchased', 'licences_active_30d', 'amount']].sum()
     a['inactive seats'] = a.licences_purchased - a.licences_active_30d
     a['inactive CHF/month'] = (a['inactive seats'] / a.licences_purchased * a.amount * 0.7848).round(0)
@@ -135,7 +136,7 @@ with t6:
 3. **Shared costs (Overhead):** resources serving multiple departments (marked "Overhead" in mapping) are allocated by FTE share from `extra/headcount.csv`.
 
 This rule is stated in `template_baseline_and_assumptions.csv` under `allocation_rule_shared_costs`.''')
-    mp = pd.read_csv('../repo/mapping_departments_tools.csv', encoding='utf-8-sig')
+    mp = pd.read_csv(os.path.join(DATA_DIR, 'mapping_departments_tools.csv'), encoding='utf-8-sig')
     st.markdown('**Resource → department mapping** (`mapping_departments_tools.csv`)')
     st.dataframe(mp[['resource_id', 'tool', 'department', 'cost_center', 'responsible_role', 'criticality']], width='stretch')
     dept = f.groupby('department')[['cost_chf', 'kwh', 'co2']].sum().sort_values('cost_chf', ascending=False)

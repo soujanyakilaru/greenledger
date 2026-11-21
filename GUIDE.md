@@ -126,8 +126,23 @@ The data contains **at least five free-text fields written as commands to AI sys
 ## 9. Run it
 
 ```bash
+# 1. Clone both repos side by side
+git clone https://github.com/soujanyakilaru/greenledger.git
+git clone https://github.com/Fa-Bee/sprintd-basel-green-ai-data.git
+
+# 2. Install dependencies
+cd greenledger
 pip install -r requirements.txt
-python load.py ../repo        # builds facts.pkl from the 13 core files
-python package.py             # prints target check for low/mid/high
+
+# 3. Rebuild facts.pkl from raw data (already included, but re-run if data changes)
+python load.py ../sprintd-basel-green-ai-data
+
+# 4. Verify targets
+python package.py
+
+# 5. Launch the app
 streamlit run app.py
 ```
+
+The app looks for case data in `../sprintd-basel-green-ai-data/` by default.
+Override with: `GREENLEDGER_DATA=/path/to/data streamlit run app.py`
