@@ -12,14 +12,17 @@ from config import DATA_DIR
 # ---------------------------------------------------------------------------
 COLORS = {
     'primary': '#0D47A1', 'accent': '#00C853', 'warn': '#FF6D00',
-    'danger': '#D50000', 'bg_card': '#F8F9FA', 'text': '#212529',
-    'chf': '#1565C0', 'kwh': '#F9A825', 'co2': '#2E7D32',
-    'grid': '#E0E0E0', 'white': '#FFFFFF',
-    'palette': ['#1565C0', '#2E7D32', '#F9A825', '#D50000', '#6A1B9A',
-                '#00838F', '#EF6C00', '#AD1457'],
+    'danger': '#D50000', 'bg_card': '#1E1E2E', 'text': '#E0E0E0',
+    'chf': '#42A5F5', 'kwh': '#FFA726', 'co2': '#66BB6A',
+    'grid': '#333', 'white': '#FFFFFF',
+    'palette': ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350', '#AB47BC',
+                '#26C6DA', '#FF7043', '#EC407A'],
+    'chart_bg': 'rgba(0,0,0,0)',
+    'chart_grid': 'rgba(255,255,255,0.08)',
+    'chart_text': '#B0B0B0',
 }
 
-st.set_page_config(page_title='GreenLedger', page_icon='📊', layout='wide',
+st.set_page_config(page_title='GreenLedger', page_icon=None, layout='wide',
                    initial_sidebar_state='expanded')
 
 st.markdown("""<style>
@@ -29,20 +32,20 @@ st.markdown("""<style>
     [data-testid="stSidebar"] { background: linear-gradient(180deg, #0D47A1 0%, #1565C0 100%); }
     [data-testid="stSidebar"] * { color: #fff !important; }
     [data-testid="stSidebar"] .stRadio label { color: #E3F2FD !important; }
-    .kpi-card { background: #fff; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    .kpi-card { background: #1E1E2E; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                 border-left: 4px solid; margin-bottom: 8px; }
-    .kpi-label { font-size: 0.8rem; font-weight: 500; color: #757575; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .kpi-label { font-size: 0.8rem; font-weight: 500; color: #9E9E9E; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
     .kpi-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 2px; }
     .kpi-delta { font-size: 0.85rem; font-weight: 500; }
-    .delta-good { color: #2E7D32; } .delta-bad { color: #D50000; } .delta-neutral { color: #757575; }
-    .section-header { font-size: 1.1rem; font-weight: 600; color: #0D47A1; margin: 1.2rem 0 0.6rem; padding-bottom: 6px;
-                      border-bottom: 2px solid #E3F2FD; }
+    .delta-good { color: #66BB6A; } .delta-bad { color: #EF5350; } .delta-neutral { color: #9E9E9E; }
+    .section-header { font-size: 1.1rem; font-weight: 600; color: #64B5F6; margin: 1.2rem 0 0.6rem; padding-bottom: 6px;
+                      border-bottom: 2px solid rgba(100,181,246,0.3); }
     div[data-testid="stMetricValue"] { font-size: 1.4rem; }
     .stTabs [data-baseweb="tab-list"] { gap: 0; }
     .stTabs [data-baseweb="tab"] { padding: 8px 20px; font-weight: 500; }
 </style>""", unsafe_allow_html=True)
 
-def kpi_card(label, value, delta=None, delta_type='neutral', border_color='#1565C0'):
+def kpi_card(label, value, delta=None, delta_type='neutral', border_color='#42A5F5'):
     dt = ''
     if delta:
         cls = {'good': 'delta-good', 'bad': 'delta-bad'}.get(delta_type, 'delta-neutral')
@@ -53,11 +56,13 @@ def kpi_card(label, value, delta=None, delta_type='neutral', border_color='#1565
 
 def chart_layout(fig, height=380, margin=None):
     fig.update_layout(
-        font_family='Inter', plot_bgcolor='#FAFAFA', paper_bgcolor='#FAFAFA',
+        font=dict(family='Inter', color=COLORS['chart_text']),
+        plot_bgcolor=COLORS['chart_bg'], paper_bgcolor=COLORS['chart_bg'],
         margin=margin or dict(l=40, r=20, t=40, b=40), height=height,
-        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font_size=11),
-        xaxis=dict(gridcolor='#EEEEEE', zeroline=False),
-        yaxis=dict(gridcolor='#EEEEEE', zeroline=False),
+        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1,
+                    font=dict(size=11, color=COLORS['chart_text'])),
+        xaxis=dict(gridcolor=COLORS['chart_grid'], zeroline=False),
+        yaxis=dict(gridcolor=COLORS['chart_grid'], zeroline=False),
     )
     return fig
 
@@ -65,14 +70,14 @@ def chart_layout(fig, height=380, margin=None):
 # Sidebar
 # ---------------------------------------------------------------------------
 with st.sidebar:
-    st.markdown('### 📊 GreenLedger')
+    st.markdown('### GreenLedger')
     st.caption('Three-Currency Ledger')
     st.divider()
-    scen = st.radio('**Scenario**', ['Low', 'Mid', 'High'], index=1,
+    scen = st.radio('Scenario', ['Low', 'Mid', 'High'], index=1,
                     help='Each factor carries low/mid/high with cited source')
     s = ['Low', 'Mid', 'High'].index(scen)
     st.divider()
-    st.markdown('**Evidence levels**')
+    st.markdown('Evidence levels')
     st.markdown("""
     <span style="background:#2E7D32;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem">CONFIRMED</span> verified from PDF<br>
     <span style="background:#1565C0;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem">LITERATURE</span> published source<br>
@@ -80,7 +85,7 @@ with st.sidebar:
     <span style="background:#757575;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem">DATA</span> from project CSVs
     """, unsafe_allow_html=True)
     st.divider()
-    st.caption(f'Scenario: **{scen}** · Data: Sep 2025 — Aug 2026')
+    st.caption(f'Scenario: {scen} | Data: Sep 2025 - Aug 2026')
 
 # ---------------------------------------------------------------------------
 # Data
@@ -105,10 +110,10 @@ f, p, tot = load_data(s)
 # ---------------------------------------------------------------------------
 # Header KPIs
 # ---------------------------------------------------------------------------
-st.markdown('<div style="margin-bottom:4px"><span style="font-size:1.6rem;font-weight:700;color:#0D47A1">GreenLedger</span>'
-            '  <span style="font-size:0.95rem;color:#757575">Three-Currency Digital Services Ledger</span></div>',
+st.markdown('<div style="margin-bottom:4px"><span style="font-size:1.6rem;font-weight:700;color:#64B5F6">GreenLedger</span>'
+            '  <span style="font-size:0.95rem;color:#9E9E9E">Three-Currency Digital Services Ledger</span></div>',
             unsafe_allow_html=True)
-st.caption('Sample SME, Basel · Baseline Sep 2025 — Aug 2026 · CO₂ location-based · Every figure is an estimate with an open calculation')
+st.caption('Sample SME, Basel | Baseline Sep 2025 - Aug 2026 | CO2 location-based | Every figure is an estimate with an open calculation')
 
 co2_saved_pct = p.co2.sum() / tot.co2 * 100
 cost_saved_pct = p.chf.sum() / tot.cost_chf * 100
@@ -120,58 +125,62 @@ with k1:
 with k2:
     st.markdown(kpi_card('Annual Energy', f'{tot.kwh:,.0f} kWh', f'PUE {F["pue"][s]:.2f} applied', border_color=COLORS['kwh']), unsafe_allow_html=True)
 with k3:
-    st.markdown(kpi_card('Annual CO₂', f'{tot.co2:,.0f} kg', 'Location-based', border_color=COLORS['co2']), unsafe_allow_html=True)
+    st.markdown(kpi_card('Annual CO2', f'{tot.co2:,.0f} kg', 'Location-based', border_color=COLORS['co2']), unsafe_allow_html=True)
 with k4:
     dt = 'good' if co2_saved_pct >= 40 else 'bad'
-    st.markdown(kpi_card('CO₂ Reduction', f'{co2_saved_pct:.1f}%', f'Target ≥ 40%  {"✓" if co2_saved_pct >= 40 else "✗"}', dt, '#2E7D32' if dt == 'good' else '#D50000'), unsafe_allow_html=True)
+    sym = 'v' if co2_saved_pct >= 40 else 'x'
+    st.markdown(kpi_card('CO2 Reduction', f'{co2_saved_pct:.1f}%', f'Target >= 40% [{sym}]', dt, '#66BB6A' if dt == 'good' else '#EF5350'), unsafe_allow_html=True)
 with k5:
     dt = 'good' if cost_saved_pct >= 25 else 'bad'
-    st.markdown(kpi_card('Cost Reduction', f'{cost_saved_pct:.1f}%', f'Target ≥ 25%  {"✓" if cost_saved_pct >= 25 else "✗"}', dt, '#1565C0' if dt == 'good' else '#D50000'), unsafe_allow_html=True)
+    sym = 'v' if cost_saved_pct >= 25 else 'x'
+    st.markdown(kpi_card('Cost Reduction', f'{cost_saved_pct:.1f}%', f'Target >= 25% [{sym}]', dt, '#42A5F5' if dt == 'good' else '#EF5350'), unsafe_allow_html=True)
 
 st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # Tabs
 # ---------------------------------------------------------------------------
-tabs = st.tabs(['📊 Overview', '🎯 Measures', '🔮 Forecast', '⚠️ Guardrails', '📋 Assumptions', '🏢 Allocation'])
+tabs = st.tabs(['Overview', 'Measures', 'Forecast', 'Guardrails', 'Assumptions', 'Allocation'])
 
 # ===== TAB 1: OVERVIEW =====
 with tabs[0]:
     col_left, col_right = st.columns([3, 2])
 
     with col_left:
-        st.markdown('<div class="section-header">Cost & CO₂ by Location</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Cost and CO2 by Location</div>', unsafe_allow_html=True)
         loc = f.groupby('location')[['cost_chf', 'kwh', 'co2']].sum().reset_index()
-        loc.columns = ['Location', 'Cost (CHF)', 'Energy (kWh)', 'CO₂ (kg)']
-        loc['Location'] = loc['Location'].map({'CH': '🇨🇭 Zurich', 'DE': '🇩🇪 Frankfurt', 'IE': '🇮🇪 Dublin', 'EU': '🇪🇺 EU Mixed'})
+        loc.columns = ['Location', 'Cost (CHF)', 'Energy (kWh)', 'CO2 (kg)']
+        loc_names = {'CH': 'Zurich (CH)', 'DE': 'Frankfurt (DE)', 'IE': 'Dublin (IE)', 'EU': 'EU Mixed'}
+        loc['Location'] = loc['Location'].map(loc_names)
 
         fig = make_subplots(rows=1, cols=2, specs=[[{'type': 'pie'}, {'type': 'pie'}]],
-                            subplot_titles=['Cost Distribution', 'CO₂ Distribution'])
+                            subplot_titles=['Cost Distribution', 'CO2 Distribution'])
         fig.add_trace(go.Pie(labels=loc['Location'], values=loc['Cost (CHF)'],
                              marker_colors=COLORS['palette'][:4], hole=0.45,
-                             textinfo='label+percent', textfont_size=11), row=1, col=1)
-        fig.add_trace(go.Pie(labels=loc['Location'], values=loc['CO₂ (kg)'],
+                             textinfo='label+percent', textfont=dict(size=11, color='#E0E0E0')), row=1, col=1)
+        fig.add_trace(go.Pie(labels=loc['Location'], values=loc['CO2 (kg)'],
                              marker_colors=COLORS['palette'][:4], hole=0.45,
-                             textinfo='label+percent', textfont_size=11), row=1, col=2)
+                             textinfo='label+percent', textfont=dict(size=11, color='#E0E0E0')), row=1, col=2)
         fig = chart_layout(fig, height=320, margin=dict(l=20, r=20, t=40, b=20))
+        fig.update_layout(showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
     with col_right:
-        st.markdown('<div class="section-header">Top CO₂ Emitters</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Top CO2 Emitters</div>', unsafe_allow_html=True)
         top = f.groupby('resource_id')[['co2', 'cost_chf']].sum().nlargest(8, 'co2').reset_index()
         fig = go.Figure(go.Bar(
             y=top.resource_id, x=top.co2, orientation='h',
             marker_color=COLORS['co2'], text=top.co2.round(0).astype(int),
-            textposition='outside', textfont_size=11,
+            textposition='outside', textfont=dict(size=11, color=COLORS['chart_text']),
         ))
-        fig.update_layout(yaxis=dict(autorange='reversed', title=''), xaxis_title='kg CO₂ / year')
+        fig.update_layout(yaxis=dict(autorange='reversed', title=''), xaxis_title='kg CO2 / year')
         fig = chart_layout(fig, height=320, margin=dict(l=100, r=40, t=20, b=40))
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown('<div class="section-header">Monthly Trend</div>', unsafe_allow_html=True)
     monthly = f.groupby('month')[['cost_chf', 'kwh', 'co2']].sum().reset_index()
     monthly['month'] = pd.to_datetime(monthly['month'])
-    fig = make_subplots(rows=1, cols=3, subplot_titles=['Cost (CHF)', 'Energy (kWh)', 'CO₂ (kg)'], shared_xaxes=True)
+    fig = make_subplots(rows=1, cols=3, subplot_titles=['Cost (CHF)', 'Energy (kWh)', 'CO2 (kg)'], shared_xaxes=True)
     for i, (col, color) in enumerate([('cost_chf', COLORS['chf']), ('kwh', COLORS['kwh']), ('co2', COLORS['co2'])]):
         fig.add_trace(go.Bar(x=monthly.month, y=monthly[col], marker_color=color, name=col, showlegend=False), row=1, col=i+1)
     fig = chart_layout(fig, height=280, margin=dict(l=50, r=20, t=40, b=40))
@@ -183,11 +192,11 @@ with tabs[0]:
     g = f.groupby(view_map[view])[['cost_chf', 'kwh', 'co2']].sum().sort_values('co2', ascending=False)
     fig = go.Figure()
     fig.add_trace(go.Bar(name='Cost (CHF)', x=g.index, y=g.cost_chf, marker_color=COLORS['chf'], yaxis='y'))
-    fig.add_trace(go.Scatter(name='CO₂ (kg)', x=g.index, y=g.co2, mode='lines+markers',
+    fig.add_trace(go.Scatter(name='CO2 (kg)', x=g.index, y=g.co2, mode='lines+markers',
                              marker_color=COLORS['co2'], yaxis='y2', line=dict(width=3)))
     fig.update_layout(
-        yaxis=dict(title='CHF', side='left', gridcolor='#EEEEEE'),
-        yaxis2=dict(title='kg CO₂', side='right', overlaying='y', showgrid=False),
+        yaxis=dict(title='CHF', side='left', gridcolor=COLORS['chart_grid']),
+        yaxis2=dict(title='kg CO2', side='right', overlaying='y', showgrid=False),
         barmode='group',
     )
     fig = chart_layout(fig, height=350)
@@ -199,7 +208,7 @@ with tabs[1]:
 
     with mc1:
         st.markdown('<div class="section-header">Recommendation Engine</div>', unsafe_allow_html=True)
-        st.caption('Finding → Recommendation → Safety condition → Named decision owner')
+        st.caption('Finding > Recommendation > Safety condition > Named decision owner')
 
     with mc2:
         pick = st.multiselect('Select measures', p.id.tolist(), default=p.id.tolist(), key='measures_pick')
@@ -212,66 +221,74 @@ with tabs[1]:
     g1, g2, g3, g4 = st.columns(4)
     with g1:
         fig = go.Figure(go.Indicator(mode='gauge+number', value=co*100,
-            number={'suffix': '%', 'font': {'size': 36}},
-            gauge={'axis': {'range': [0, 60]}, 'bar': {'color': COLORS['co2']},
-                   'steps': [{'range': [0, 40], 'color': '#FFCDD2'}, {'range': [40, 60], 'color': '#C8E6C9'}],
-                   'threshold': {'line': {'color': '#D50000', 'width': 3}, 'value': 40}},
-            title={'text': 'CO₂ Reduction', 'font': {'size': 14}}))
-        fig.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=10))
+            number={'suffix': '%', 'font': {'size': 36, 'color': '#E0E0E0'}},
+            gauge={'axis': {'range': [0, 60], 'tickcolor': '#9E9E9E'}, 'bar': {'color': COLORS['co2']},
+                   'bgcolor': '#2A2A3E',
+                   'steps': [{'range': [0, 40], 'color': '#3E2A2A'}, {'range': [40, 60], 'color': '#2A3E2A'}],
+                   'threshold': {'line': {'color': '#EF5350', 'width': 3}, 'value': 40}},
+            title={'text': 'CO2 Reduction', 'font': {'size': 14, 'color': '#B0B0B0'}}))
+        fig.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=10),
+                          paper_bgcolor=COLORS['chart_bg'])
         st.plotly_chart(fig, use_container_width=True)
     with g2:
         fig = go.Figure(go.Indicator(mode='gauge+number', value=cs*100,
-            number={'suffix': '%', 'font': {'size': 36}},
-            gauge={'axis': {'range': [0, 40]}, 'bar': {'color': COLORS['chf']},
-                   'steps': [{'range': [0, 25], 'color': '#BBDEFB'}, {'range': [25, 40], 'color': '#C8E6C9'}],
-                   'threshold': {'line': {'color': '#D50000', 'width': 3}, 'value': 25}},
-            title={'text': 'Cost Reduction', 'font': {'size': 14}}))
-        fig.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=10))
+            number={'suffix': '%', 'font': {'size': 36, 'color': '#E0E0E0'}},
+            gauge={'axis': {'range': [0, 40], 'tickcolor': '#9E9E9E'}, 'bar': {'color': COLORS['chf']},
+                   'bgcolor': '#2A2A3E',
+                   'steps': [{'range': [0, 25], 'color': '#2A2A3E'}, {'range': [25, 40], 'color': '#2A3E2A'}],
+                   'threshold': {'line': {'color': '#EF5350', 'width': 3}, 'value': 25}},
+            title={'text': 'Cost Reduction', 'font': {'size': 14, 'color': '#B0B0B0'}}))
+        fig.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=10),
+                          paper_bgcolor=COLORS['chart_bg'])
         st.plotly_chart(fig, use_container_width=True)
     with g3:
         fig = go.Figure(go.Indicator(mode='number+delta', value=ef,
-            number={'prefix': 'CHF ', 'font': {'size': 32}},
+            number={'prefix': 'CHF ', 'font': {'size': 32, 'color': '#E0E0E0'}},
             delta={'reference': 16500, 'relative': False, 'valueformat': ',.0f',
-                   'increasing': {'color': '#D50000'}, 'decreasing': {'color': '#2E7D32'}},
-            title={'text': 'Effort vs Budget CHF 16,500', 'font': {'size': 14}}))
-        fig.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=10))
+                   'increasing': {'color': '#EF5350'}, 'decreasing': {'color': '#66BB6A'}},
+            title={'text': 'Effort vs Budget CHF 16,500', 'font': {'size': 14, 'color': '#B0B0B0'}}))
+        fig.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=10),
+                          paper_bgcolor=COLORS['chart_bg'])
         st.plotly_chart(fig, use_container_width=True)
     with g4:
         fig = go.Figure(go.Indicator(mode='number', value=q.pd.sum(),
-            number={'suffix': ' PD', 'font': {'size': 36}},
-            title={'text': f'{len(q)} Measures Selected', 'font': {'size': 14}}))
-        fig.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=10))
+            number={'suffix': ' PD', 'font': {'size': 36, 'color': '#E0E0E0'}},
+            title={'text': f'{len(q)} Measures Selected', 'font': {'size': 14, 'color': '#B0B0B0'}}))
+        fig.update_layout(height=200, margin=dict(l=20, r=20, t=40, b=10),
+                          paper_bgcolor=COLORS['chart_bg'])
         st.plotly_chart(fig, use_container_width=True)
 
     left, right = st.columns([3, 2])
     with left:
-        st.markdown('<div class="section-header">Waterfall: Baseline → After Measures</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">Waterfall: Baseline to After Measures</div>', unsafe_allow_html=True)
         wf_names = ['Baseline'] + q.id.tolist() + ['After']
         wf_values = [tot.co2] + (-q.co2).tolist() + [tot.co2 - q.co2.sum()]
         wf_measure = ['absolute'] + ['relative'] * len(q) + ['total']
         fig = go.Figure(go.Waterfall(
             x=wf_names, y=wf_values, measure=wf_measure,
-            connector={'line': {'color': '#BDBDBD'}},
+            connector={'line': {'color': '#555'}},
             increasing={'marker': {'color': '#EF5350'}},
             decreasing={'marker': {'color': '#66BB6A'}},
             totals={'marker': {'color': COLORS['chf']}},
             textposition='outside', text=[f'{abs(v):,.0f}' for v in wf_values],
+            textfont=dict(color=COLORS['chart_text']),
         ))
-        fig.update_layout(yaxis_title='kg CO₂ / year')
+        fig.update_layout(yaxis_title='kg CO2 / year')
         fig = chart_layout(fig, height=350)
         st.plotly_chart(fig, use_container_width=True)
 
     with right:
         st.markdown('<div class="section-header">Impact vs Effort</div>', unsafe_allow_html=True)
         fig = go.Figure()
-        for _, row in q.iterrows():
+        for idx, row in q.iterrows():
             fig.add_trace(go.Scatter(
                 x=[row.chf], y=[row.co2], mode='markers+text',
-                marker=dict(size=row.pd * 15 + 10, color=COLORS['palette'][_ % len(COLORS['palette'])], opacity=0.8),
-                text=[row.id], textposition='top center', name=row.id,
-                hovertemplate=f"<b>{row.id}</b><br>CHF saved: {row.chf:,.0f}<br>CO₂ saved: {row.co2:,.0f} kg<br>Effort: {row.pd} PD<extra></extra>",
+                marker=dict(size=row.pd * 15 + 10, color=COLORS['palette'][idx % len(COLORS['palette'])], opacity=0.8),
+                text=[row.id], textposition='top center', textfont=dict(color=COLORS['chart_text']),
+                name=row.id,
+                hovertemplate=f"<b>{row.id}</b><br>CHF saved: {row.chf:,.0f}<br>CO2 saved: {row.co2:,.0f} kg<br>Effort: {row.pd} PD<extra></extra>",
             ))
-        fig.update_layout(xaxis_title='CHF Saved / Year', yaxis_title='kg CO₂ Saved / Year', showlegend=False)
+        fig.update_layout(xaxis_title='CHF Saved / Year', yaxis_title='kg CO2 Saved / Year', showlegend=False)
         fig = chart_layout(fig, height=350)
         st.plotly_chart(fig, use_container_width=True)
 
@@ -296,20 +313,20 @@ with tabs[1]:
     ]
     st.dataframe(pd.DataFrame(recs), use_container_width=True, hide_index=True)
 
-    with st.expander('📊 Supporting evidence from data files', expanded=False):
+    with st.expander('Supporting evidence from data files', expanded=False):
         try:
             dp = pd.read_csv(os.path.join(DATA_DIR, 'data_platform_usage.csv'), encoding='utf-8-sig')
             dp = dp[(dp.date >= '2025-09-01') & (dp.date < '2026-09-01')].groupby('resource_id')[['runtime_h', 'active_use_h']].sum()
             dp['idle_pct'] = (100 - dp.active_use_h / dp.runtime_h * 100).round(0)
-            st.markdown('**Data platform utilisation**')
+            st.markdown('Data platform utilisation')
             st.dataframe(dp, use_container_width=True)
         except Exception:
             st.info('Data platform usage file not available in this environment.')
         try:
             sm = pd.read_csv(os.path.join(DATA_DIR, 'server_metrics_weekly.csv'), encoding='utf-8-sig')
-            g = sm[sm.server_id == 'gpu-ml-01']
-            st.markdown('**GPU server weekly utilisation**')
-            fig = px.area(g, x='week_start', y='gpu_avg_pct', color_discrete_sequence=[COLORS['warn']])
+            gp = sm[sm.server_id == 'gpu-ml-01']
+            st.markdown('GPU server weekly utilisation')
+            fig = px.area(gp, x='week_start', y='gpu_avg_pct', color_discrete_sequence=[COLORS['warn']])
             fig = chart_layout(fig, height=250)
             st.plotly_chart(fig, use_container_width=True)
         except Exception:
@@ -318,15 +335,15 @@ with tabs[1]:
             sub = pd.read_csv(os.path.join(DATA_DIR, 'ai_subscriptions.csv'), encoding='utf-8-sig')
             a = sub[(sub.month == '2026-08-01') & (sub.contract_status == 'Final')].groupby('product')[['licences_purchased', 'licences_active_30d', 'amount']].sum()
             a['inactive_seats'] = a.licences_purchased - a.licences_active_30d
-            st.markdown('**AI subscriptions August 2026**')
+            st.markdown('AI subscriptions August 2026')
             st.dataframe(a, use_container_width=True)
         except Exception:
             st.info('AI subscriptions file not available in this environment.')
 
 # ===== TAB 3: FORECAST =====
 with tabs[2]:
-    st.markdown('<div class="section-header">3-Year Forecast: Baseline vs. After Measures</div>', unsafe_allow_html=True)
-    st.caption('Monte Carlo simulation across low/mid/high factor scenarios, projecting the impact of implementing measures over 3 years.')
+    st.markdown('<div class="section-header">3-Year Forecast: Baseline vs After Measures</div>', unsafe_allow_html=True)
+    st.caption('Scenario projection across low/mid/high factor ranges, showing the impact of implementing measures over 3 years.')
 
     fc1, fc2 = st.columns([1, 1])
     with fc1:
@@ -364,7 +381,7 @@ with tabs[2]:
     high_df = fdf[fdf.scenario == 'high']
 
     for metric, unit, color_bl, color_af, title in [
-        ('co2', 'kg CO₂', '#EF5350', '#66BB6A', 'CO₂ Emissions Forecast'),
+        ('co2', 'kg CO2', '#EF5350', '#66BB6A', 'CO2 Emissions Forecast'),
         ('cost', 'CHF', '#EF5350', '#42A5F5', 'Cost Forecast'),
         ('kwh', 'kWh', '#EF5350', '#FFA726', 'Energy Forecast'),
     ]:
@@ -389,7 +406,7 @@ with tabs[2]:
         ))
         fig.add_trace(go.Scatter(
             x=mid_df.year, y=low_df[f'af_{metric}'], fill='tonexty',
-            fillcolor=f'rgba(102,187,106,0.15)', mode='lines', line=dict(width=0),
+            fillcolor='rgba(102,187,106,0.15)', mode='lines', line=dict(width=0),
             name='After measures range', hoverinfo='skip',
         ))
         fig.add_trace(go.Scatter(
@@ -398,7 +415,8 @@ with tabs[2]:
             marker=dict(size=8),
         ))
         cum_saved = (mid_df[f'bl_{metric}'].values - mid_df[f'af_{metric}'].values).sum()
-        fig.update_layout(title=dict(text=f'{title}  —  3-year cumulative saving: {cum_saved:,.0f} {unit}', font_size=14),
+        fig.update_layout(title=dict(text=f'{title}  -  3-year cumulative saving: {cum_saved:,.0f} {unit}',
+                                     font=dict(size=14, color=COLORS['chart_text'])),
                           yaxis_title=unit)
         fig = chart_layout(fig, height=320)
         st.plotly_chart(fig, use_container_width=True)
@@ -412,25 +430,25 @@ with tabs[2]:
         summary_rows.append({
             'Scenario': scenario_name.title(),
             'Baseline Cost (CHF)': f'{bl.cost_chf:,.0f}',
-            'Baseline CO₂ (kg)': f'{bl.co2:,.0f}',
+            'Baseline CO2 (kg)': f'{bl.co2:,.0f}',
             'Saved Cost (CHF)': f'{sv.chf.sum():,.0f}',
-            'Saved CO₂ (kg)': f'{sv.co2.sum():,.0f}',
-            'CO₂ Reduction %': f'{sv.co2.sum()/bl.co2*100:.1f}%',
+            'Saved CO2 (kg)': f'{sv.co2.sum():,.0f}',
+            'CO2 Reduction %': f'{sv.co2.sum()/bl.co2*100:.1f}%',
             'Cost Reduction %': f'{sv.chf.sum()/bl.cost_chf*100:.1f}%',
         })
     st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, hide_index=True)
 
-    st.info('**Live data integration:** Connect this dashboard to your Azure Cost Management API and cloud monitoring '
-            'to automatically refresh data monthly. Set `GREENLEDGER_DATA` env var to your data directory.')
+    st.info('Live data integration: Connect this dashboard to your Azure Cost Management API and cloud monitoring '
+            'to automatically refresh data monthly. Set GREENLEDGER_DATA env var to your data directory.')
 
 # ===== TAB 4: GUARDRAILS =====
 with tabs[3]:
     st.markdown('<div class="section-header">Safety Engine: What We Will NOT Do</div>', unsafe_allow_html=True)
 
-    st.error('**Switch off production platform nights & weekends? → NO.** Month-end close until 04:00, ETL done by 06:00, '
+    st.error('Switch off production platform nights and weekends? NO. Month-end close until 04:00, ETL done by 06:00, '
              'PBI 07:30, year-end close. Instead: autoscaling outside these windows (M4).')
-    st.warning('**Delete backup archive? → BLOCKED.** 10-year legal retention (T-1039); request already rejected (T-1195).')
-    st.warning('**Switch off dr-failover (0% CPU)? → BLOCKED.** Emergency fallback required by management (T-1094).')
+    st.warning('Delete backup archive? BLOCKED. 10-year legal retention (T-1039); request already rejected (T-1195).')
+    st.warning('Switch off dr-failover (0% CPU)? BLOCKED. Emergency fallback required by management (T-1094).')
 
     gc1, gc2 = st.columns(2)
     with gc1:
@@ -454,15 +472,15 @@ with tabs[3]:
 with tabs[4]:
     st.markdown('<div class="section-header">Conversion Factors (Low / Mid / High)</div>', unsafe_allow_html=True)
 
-    with st.expander('**Why the Swiss consumption mix?**', expanded=False):
-        st.markdown('''The data centre draws electricity from the grid, which includes imported electricity (especially in winter).
-The production mix (Swiss domestic generation only) would understate actual emissions.
-VSE/strom.ch reports the consumption mix including imports at **90 g CO₂/kWh for 2025** (up from 57 g in 2024).''')
+    with st.expander('Why the Swiss consumption mix?', expanded=False):
+        st.markdown('The data centre draws electricity from the grid, which includes imported electricity (especially in winter). '
+                    'The production mix (Swiss domestic generation only) would understate actual emissions. '
+                    'VSE/strom.ch reports the consumption mix including imports at 90 g CO2/kWh for 2025 (up from 57 g in 2024).')
 
-    with st.expander('**PUE explained**', expanded=False):
-        st.markdown('''**Power Usage Effectiveness** = total facility energy / IT equipment energy.
-Hyperscalers (Google, Azure) report **1.09-1.20**. The Uptime Institute global average is **1.56** (2024 survey, n=526)
-and **1.54** (2025 survey, n=681). We use **1.20 mid** because this SME uses major cloud providers, not own data centres.''')
+    with st.expander('PUE explained', expanded=False):
+        st.markdown('Power Usage Effectiveness = total facility energy / IT equipment energy. '
+                    'Hyperscalers (Google, Azure) report 1.09-1.20. The Uptime Institute global average is 1.56 (2024 survey, n=526) '
+                    'and 1.54 (2025 survey, n=681). We use 1.20 mid because this SME uses major cloud providers, not own data centres.')
 
     factors_df = pd.DataFrame([(k, v[0], v[1], v[2], v[3], v[4]) for k, v in F.items()],
                                columns=['Factor', 'Low', 'Mid', 'High', 'Unit', 'Source & Evidence'])
@@ -482,14 +500,15 @@ and **1.54** (2025 survey, n=681). We use **1.20 mid** because this SME uses maj
     factors_df['Evidence'] = evidence_col
 
     ev_colors = {'CONFIRMED': '#2E7D32', 'LITERATURE': '#1565C0', 'ASSUMPTION': '#F9A825',
-                 'CALCULATED': '#6A1B9A', 'DATA': '#757575'}
+                 'CALCULATED': '#7E57C2', 'DATA': '#757575'}
 
     st.markdown('<div class="section-header">Evidence Summary</div>', unsafe_allow_html=True)
     ev_counts = factors_df.Evidence.value_counts()
     ev_cols = st.columns(len(ev_counts))
     for i, (ev, cnt) in enumerate(ev_counts.items()):
         with ev_cols[i]:
-            st.markdown(f'<div style="text-align:center;padding:12px;background:{ev_colors.get(ev,"#999")};color:#fff;border-radius:8px">'
+            text_color = '#000' if ev == 'ASSUMPTION' else '#fff'
+            st.markdown(f'<div style="text-align:center;padding:12px;background:{ev_colors.get(ev,"#999")};color:{text_color};border-radius:8px">'
                         f'<div style="font-size:1.5rem;font-weight:700">{cnt}</div>'
                         f'<div style="font-size:0.8rem">{ev}</div></div>', unsafe_allow_html=True)
 
@@ -503,7 +522,7 @@ and **1.54** (2025 survey, n=681). We use **1.20 mid** because this SME uses maj
             'High': st.column_config.NumberColumn(format='%.6f'),
         }
     )
-    st.markdown('**Exchange rates:** ECB monthly reference rates via Bundesbank (`exchange_rates.csv`). EUR/CHF and USD/CHF monthly averages.')
+    st.markdown('Exchange rates: ECB monthly reference rates via Bundesbank (exchange_rates.csv). EUR/CHF and USD/CHF monthly averages.')
 
 # ===== TAB 6: ALLOCATION =====
 with tabs[5]:
@@ -511,23 +530,25 @@ with tabs[5]:
 
     dept = f.groupby('department')[['cost_chf', 'kwh', 'co2']].sum().sort_values('cost_chf', ascending=False).reset_index()
 
-    fig = make_subplots(rows=1, cols=3, subplot_titles=['Cost (CHF)', 'Energy (kWh)', 'CO₂ (kg)'],
+    fig = make_subplots(rows=1, cols=3, subplot_titles=['Cost (CHF)', 'Energy (kWh)', 'CO2 (kg)'],
                         specs=[[{'type': 'pie'}, {'type': 'pie'}, {'type': 'pie'}]])
-    for i, (col, title) in enumerate([('cost_chf', 'Cost'), ('kwh', 'Energy'), ('co2', 'CO₂')]):
+    for i, (col, title) in enumerate([('cost_chf', 'Cost'), ('kwh', 'Energy'), ('co2', 'CO2')]):
         fig.add_trace(go.Pie(labels=dept.department, values=dept[col], hole=0.4,
                              marker_colors=COLORS['palette'], textinfo='label+percent',
-                             textfont_size=10), row=1, col=i+1)
+                             textfont=dict(size=10, color='#E0E0E0')), row=1, col=i+1)
     fig = chart_layout(fig, height=320, margin=dict(l=20, r=20, t=40, b=20))
+    fig.update_layout(showlegend=False)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown('''**Three-step allocation rule:**
-1. **Direct by tag/cost centre** — Azure tags, AWS resource_tags, or cost_center → department
-2. **Mapping file fallback** — `mapping_departments_tools.csv` for untagged resources (~13-17% of Azure rows)
-3. **Shared costs (Overhead)** — allocated by FTE share from `headcount.csv`''')
+    st.markdown('Three-step allocation rule:')
+    st.markdown("""
+1. Direct by tag/cost centre - Azure tags, AWS resource tags, or cost center to department
+2. Mapping file fallback - mapping_departments_tools.csv for untagged resources (~13-17% of Azure rows)
+3. Shared costs (Overhead) - allocated by FTE share from headcount.csv""")
 
     try:
         mp = pd.read_csv(os.path.join(DATA_DIR, 'mapping_departments_tools.csv'), encoding='utf-8-sig')
-        with st.expander('Resource → Department mapping', expanded=False):
+        with st.expander('Resource to Department mapping', expanded=False):
             st.dataframe(mp[['resource_id', 'tool', 'department', 'cost_center', 'responsible_role', 'criticality']],
                          use_container_width=True, hide_index=True)
     except Exception:
