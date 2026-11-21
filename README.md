@@ -208,3 +208,13 @@ streamlit run app.py
 | Feasibility | 15% | 8 concrete measures with named owners, guards, and IT ticket references |
 | Robustness | 15% | Low/mid/high scenarios propagated through every calculation, evidence transparency |
 | Impact | 10% | ~50% CO2 reduction, ~30% cost reduction, 3-year forecast for management |
+
+## AI Tools Used
+
+This project was built with assistance from **Claude** (Anthropic). Claude was used for:
+- Dashboard layout and Plotly chart code (`app.py`)
+- Structuring the conversion-factor pipeline (`factors.py`, `model.py`)
+- Writing guardrail logic (`guardrails.py`)
+- README documentation and voiceover script drafting
+
+All conversion factors, data interpretations, measure definitions, and guardrail decisions were reviewed and validated by the team against the provided data sources and PDFs. No pre-built template or starter kit was used — the codebase was written from scratch during the sprint.
