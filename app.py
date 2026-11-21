@@ -30,8 +30,16 @@ st.markdown("""<style>
     html, body, [class*="st-"] { font-family: 'Inter', sans-serif; }
     .block-container { padding-top: 1.5rem; padding-bottom: 1rem; max-width: 1400px; }
     [data-testid="stSidebar"] { background: linear-gradient(180deg, #0D47A1 0%, #1565C0 100%); }
-    [data-testid="stSidebar"] * { color: #fff !important; }
-    [data-testid="stSidebar"] .stRadio label { color: #E3F2FD !important; }
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] .stMarkdown,
+    [data-testid="stSidebar"] .stRadio label,
+    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] { color: #fff !important; }
     .kpi-card { background: #1E1E2E; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                 border-left: 4px solid; margin-bottom: 8px; }
     .kpi-label { font-size: 0.8rem; font-weight: 500; color: #9E9E9E; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
@@ -110,8 +118,9 @@ f, p, tot = load_data(s)
 # ---------------------------------------------------------------------------
 # Header KPIs
 # ---------------------------------------------------------------------------
-st.markdown('<div style="margin-bottom:4px"><span style="font-size:1.6rem;font-weight:700;color:#64B5F6">GreenLedger</span>'
-            '  <span style="font-size:0.95rem;color:#9E9E9E">Three-Currency Digital Services Ledger</span></div>',
+st.markdown('<div style="margin-bottom:4px;overflow:visible;white-space:nowrap">'
+            '<span style="font-size:1.5rem;font-weight:700;color:#64B5F6">GreenLedger</span>'
+            '&nbsp;&nbsp;<span style="font-size:0.9rem;color:#9E9E9E">Three-Currency Digital Services Ledger</span></div>',
             unsafe_allow_html=True)
 st.caption('Sample SME, Basel | Baseline Sep 2025 - Aug 2026 | CO2 location-based | Every figure is an estimate with an open calculation')
 
