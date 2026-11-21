@@ -1,7 +1,7 @@
 """Every conversion factor in ONE place: (low, mid, high, unit, source). Edit here -> whole app updates."""
 F = {
  # grid mix, kg CO2e per kWh, location-based
- 'grid_CH': (0.030, 0.090, 0.128, 'kg/kWh', 'Mid: VSE/strom.ch, Swiss CONSUMPTION mix incl. imports 2025 = 90 g (2024: 57 g). Low: production mix (approx.). High: KBOB life-cycle consumer mix (verify)'),
+ 'grid_CH': (0.030, 0.090, 0.128, 'kg/kWh', 'VSE (2026) CO2-Gehalt des Strommix Schweiz bis 2050, 25.02.2026. Mid: Verbraucherstrommix 2025 = 90 g (2024: 57 g) CONFIRMED. Low: CH production mix Scope 1+2 ~30 g. High: KBOB life-cycle BAFU/Treeze (2021)'),
  'grid_DE': (0.300, 0.344, 0.420, 'kg/kWh', 'UBA, CO2 per kWh 2025 = 344 g (2024: 353 g); high incl. upstream chain'),
  'grid_IE': (0.200, 0.224, 0.300, 'kg/kWh', 'EPA Ireland, power generation intensity 2024 = 224 g/kWh'),
  'grid_EU': (0.180, 0.230, 0.300, 'kg/kWh', 'EEA EU-27 average (AI providers / SaaS, location unknown) - verify'),
