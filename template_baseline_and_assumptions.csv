@@ -2,11 +2,11 @@ parameter,value_low,value_mid,value_high,unit,source,notes
 baseline_period,Sep 2025 to Aug 2026,Sep 2025 to Aug 2026,Sep 2025 to Aug 2026,,Sample data ALTYCA sprintd Basel 2026,12 full months
 total_cost,470289,470289,470289,CHF/yr,13 core CSV files harmonised by load.py,Azure + AWS + hoster + subscriptions + SaaS + AI; cost is from invoices so same in all scenarios
 total_energy,23515,49358,127092,kWh/yr,model.py,Varies with energy factors and PUE
-total_co2,2920,9049,31146,kg CO2/yr,model.py location-based,Varies with energy and grid mix factors
+total_co2,2920,9049,31146,kg CO2/yr,model.py location-based,"Varies with energy and grid mix factors; recalculate after grid_IE update 0.224->0.255"
 grid_co2_CH,0.030,0.090,0.128,kg CO2/kWh,"VSE (2026) CO2-Gehalt des Strommix Schweiz bis 2050, Ergebnisse 2026 (25.02.2026); BAFU/Treeze (2021) for KBOB","Low: CH production mix Scope 1+2 (~30 g); Mid: Verbraucherstrommix location-based 2025 = 90 g CONFIRMED; High: KBOB life-cycle consumer mix (BAFU/Treeze 2021 - VERIFY)"
-grid_co2_DE,0.300,0.344,0.420,kg CO2/kWh,UBA Germany 2025,High includes upstream chain
-grid_co2_IE,0.200,0.224,0.300,kg CO2/kWh,EPA Ireland 2024,
-grid_co2_EU,0.180,0.230,0.300,kg CO2/kWh,EEA European average 2024,Used for SaaS/AI with unknown DC location
+grid_co2_DE,0.300,0.344,0.420,kg CO2/kWh,"UBA (2025) Entwicklung der spezifischen THG-Emissionen des deutschen Strommix; UBA Umwelterklärung 2024 (DOI:10.60810/openumwelt-7820) confirms location-based methodology",High includes upstream chain
+grid_co2_IE,0.200,0.255,0.300,kg CO2/kWh,"EPA Ireland (2024c) / SEAI (2023) via catchments.ie State of Environment Report 2024",255 g CO2/kWh for 2023 CONFIRMED; low = 2025 projection with wind expansion
+grid_co2_EU,0.180,0.230,0.300,kg CO2/kWh,"EEA EU-27 average estimate (VERIFY from EEA GHG data viewer; EEA Env. Statement 2024 doi:10.2800/3308603 covers EEA operations only)",Used for SaaS/AI with unknown DC location
 pue,1.10,1.20,1.56,ratio,Hyperscaler reports (Azure/AWS),Low: best hyperscaler; Mid: typical; High: Uptime Institute global avg
 energy_vCPU_hour,0.003,0.005,0.010,kWh,Cloud Carbon Footprint coefficients,0.7-3.8 W/vCPU + memory share
 energy_node_hour,0.060,0.100,0.160,kWh,16 vCPU + 64 GB RAM node,16 x vCPU-hour + memory
