@@ -29,17 +29,6 @@ st.markdown("""<style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     html, body, [class*="st-"] { font-family: 'Inter', sans-serif; }
     .block-container { padding-top: 1.5rem; padding-bottom: 1rem; max-width: 1400px; }
-    [data-testid="stSidebar"] { background: linear-gradient(180deg, #0D47A1 0%, #1565C0 100%); }
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4,
-    [data-testid="stSidebar"] .stMarkdown,
-    [data-testid="stSidebar"] .stRadio label,
-    [data-testid="stSidebar"] [data-testid="stCaptionContainer"] { color: #fff !important; }
     .kpi-card { background: #1E1E2E; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                 border-left: 4px solid; margin-bottom: 8px; }
     .kpi-label { font-size: 0.8rem; font-weight: 500; color: #9E9E9E; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
@@ -322,7 +311,7 @@ with tabs[1]:
     ]
     st.dataframe(pd.DataFrame(recs), use_container_width=True, hide_index=True)
 
-    with st.expander('Supporting evidence from data files', expanded=False):
+    if st.toggle('Show supporting evidence from data files', key='toggle_evidence'):
         try:
             dp = pd.read_csv(os.path.join(DATA_DIR, 'data_platform_usage.csv'), encoding='utf-8-sig')
             dp = dp[(dp.date >= '2025-09-01') & (dp.date < '2026-09-01')].groupby('resource_id')[['runtime_h', 'active_use_h']].sum()
@@ -481,12 +470,12 @@ with tabs[3]:
 with tabs[4]:
     st.markdown('<div class="section-header">Conversion Factors (Low / Mid / High)</div>', unsafe_allow_html=True)
 
-    with st.expander('Why the Swiss consumption mix?', expanded=False):
+    if st.toggle('Why the Swiss consumption mix?', key='toggle_swiss'):
         st.markdown('The data centre draws electricity from the grid, which includes imported electricity (especially in winter). '
                     'The production mix (Swiss domestic generation only) would understate actual emissions. '
                     'VSE/strom.ch reports the consumption mix including imports at 90 g CO2/kWh for 2025 (up from 57 g in 2024).')
 
-    with st.expander('PUE explained', expanded=False):
+    if st.toggle('PUE explained', key='toggle_pue'):
         st.markdown('Power Usage Effectiveness = total facility energy / IT equipment energy. '
                     'Hyperscalers (Google, Azure) report 1.09-1.20. The Uptime Institute global average is 1.56 (2024 survey, n=526) '
                     'and 1.54 (2025 survey, n=681). We use 1.20 mid because this SME uses major cloud providers, not own data centres.')
@@ -557,7 +546,7 @@ with tabs[5]:
 
     try:
         mp = pd.read_csv(os.path.join(DATA_DIR, 'mapping_departments_tools.csv'), encoding='utf-8-sig')
-        with st.expander('Resource to Department mapping', expanded=False):
+        if st.toggle('Show resource to department mapping', key='toggle_mapping'):
             st.dataframe(mp[['resource_id', 'tool', 'department', 'cost_center', 'responsible_role', 'criticality']],
                          use_container_width=True, hide_index=True)
     except Exception:
