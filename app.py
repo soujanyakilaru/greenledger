@@ -26,8 +26,6 @@ st.set_page_config(page_title='GreenLedger', page_icon=None, layout='wide',
                    initial_sidebar_state='expanded')
 
 st.markdown("""<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    html, body, [class*="st-"] { font-family: 'Inter', sans-serif; }
     .block-container { padding-top: 1.5rem; padding-bottom: 1rem; max-width: 1400px; }
     .kpi-card { background: #1E1E2E; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
                 border-left: 4px solid; margin-bottom: 8px; }
@@ -37,9 +35,6 @@ st.markdown("""<style>
     .delta-good { color: #66BB6A; } .delta-bad { color: #EF5350; } .delta-neutral { color: #9E9E9E; }
     .section-header { font-size: 1.1rem; font-weight: 600; color: #64B5F6; margin: 1.2rem 0 0.6rem; padding-bottom: 6px;
                       border-bottom: 2px solid rgba(100,181,246,0.3); }
-    div[data-testid="stMetricValue"] { font-size: 1.4rem; }
-    .stTabs [data-baseweb="tab-list"] { gap: 0; }
-    .stTabs [data-baseweb="tab"] { padding: 8px 20px; font-weight: 500; }
 </style>""", unsafe_allow_html=True)
 
 def kpi_card(label, value, delta=None, delta_type='neutral', border_color='#42A5F5'):
@@ -311,7 +306,7 @@ with tabs[1]:
     ]
     st.dataframe(pd.DataFrame(recs), use_container_width=True, hide_index=True)
 
-    if st.toggle('Show supporting evidence from data files', key='toggle_evidence'):
+    with st.expander('Supporting evidence from data files', expanded=False):
         try:
             dp = pd.read_csv(os.path.join(DATA_DIR, 'data_platform_usage.csv'), encoding='utf-8-sig')
             dp = dp[(dp.date >= '2025-09-01') & (dp.date < '2026-09-01')].groupby('resource_id')[['runtime_h', 'active_use_h']].sum()
@@ -470,12 +465,12 @@ with tabs[3]:
 with tabs[4]:
     st.markdown('<div class="section-header">Conversion Factors (Low / Mid / High)</div>', unsafe_allow_html=True)
 
-    if st.toggle('Why the Swiss consumption mix?', key='toggle_swiss'):
+    with st.expander('Why the Swiss consumption mix?', expanded=False):
         st.markdown('The data centre draws electricity from the grid, which includes imported electricity (especially in winter). '
                     'The production mix (Swiss domestic generation only) would understate actual emissions. '
                     'VSE/strom.ch reports the consumption mix including imports at 90 g CO2/kWh for 2025 (up from 57 g in 2024).')
 
-    if st.toggle('PUE explained', key='toggle_pue'):
+    with st.expander('PUE explained', expanded=False):
         st.markdown('Power Usage Effectiveness = total facility energy / IT equipment energy. '
                     'Hyperscalers (Google, Azure) report 1.09-1.20. The Uptime Institute global average is 1.56 (2024 survey, n=526) '
                     'and 1.54 (2025 survey, n=681). We use 1.20 mid because this SME uses major cloud providers, not own data centres.')
@@ -546,7 +541,7 @@ with tabs[5]:
 
     try:
         mp = pd.read_csv(os.path.join(DATA_DIR, 'mapping_departments_tools.csv'), encoding='utf-8-sig')
-        if st.toggle('Show resource to department mapping', key='toggle_mapping'):
+        with st.expander('Resource to Department mapping', expanded=False):
             st.dataframe(mp[['resource_id', 'tool', 'department', 'cost_center', 'responsible_role', 'criticality']],
                          use_container_width=True, hide_index=True)
     except Exception:
