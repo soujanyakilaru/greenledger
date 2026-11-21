@@ -1,0 +1,18 @@
+parameter,value,unit,source,notes
+baseline_period,Sep 2025 to Aug 2026,,Sample data ALTYCA sprintd Basel 2026,12 full months
+total_cost,470289,CHF/yr,13 core CSV files harmonised by load.py,Azure + AWS + hoster + subscriptions + SaaS + AI
+total_energy_mid,49358,kWh/yr,model.py mid scenario,Range: 23515 (low) to 127092 (high)
+total_co2_mid,9049,kg CO2/yr,model.py mid scenario location-based,Range: 2920 (low) to 31146 (high)
+grid_co2_CH,0.090,kg CO2/kWh,VSE/strom.ch 2025 consumption mix incl. imports,Production mix 0.030; KBOB life-cycle 0.128
+grid_co2_DE,0.344,kg CO2/kWh,UBA Germany 2025,353 g in 2024
+grid_co2_IE,0.224,kg CO2/kWh,EPA Ireland 2024,
+grid_co2_EU,0.230,kg CO2/kWh,EEA European average 2024,Used for SaaS/AI with unknown DC location
+pue,1.20,,Hyperscaler reports (Azure/AWS),Range: 1.10 (best) to 1.56 (Uptime Institute global avg)
+energy_vCPU_hour,0.005,kWh,Cloud Carbon Footprint coefficients,Range: 0.003 to 0.010
+energy_node_hour,0.100,kWh,16 vCPU + 64 GB RAM node,Range: 0.06 to 0.16
+energy_GPU_hour,0.250,kWh,300 W GPU + host share,Range: 0.12 to 0.40
+energy_token_large,0.0005,kWh per 1000 tokens,ML.ENERGY leaderboard; Google 2025,Range: 0.0001 to 0.002
+energy_token_small,0.0001,kWh per 1000 tokens,ML.ENERGY leaderboard,Range: 0.00002 to 0.0004
+exchange_rate_EUR_CHF,0.9397,CHF per EUR,ECB monthly reference rates via Bundesbank Nov 2026,Monthly averages applied per invoice month
+exchange_rate_USD_CHF,0.7848,CHF per USD,ECB monthly reference rates via Bundesbank Nov 2026,Monthly averages applied per invoice month
+allocation_rule_shared_costs,Direct by tag then mapping file then shared by FTE,,headcount.csv for FTE shares,Three-step: tag/cost_center -> mapping_departments_tools.csv -> Overhead by FTE

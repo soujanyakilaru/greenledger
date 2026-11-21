@@ -1,0 +1,10 @@
+measure_id,measure_title,resource,person_days,effort_chf,chf_saved_yr,kwh_saved_yr,co2_saved_yr_kg,co2_reduction_pct,decision_owner,guard_rail
+M1,Auto-pause dev cluster; auto-start for quarterly training,dp-dev,2.0,2200,32539,7089,2439,27.0,Head of IT,Training days 1-3 Jan/Apr/Jul/Oct need 24 h (T-1053 T-1101)
+M2,GPU server on demand instead of 24/7,gpu-ml,2.0,2200,8990,2074,713,7.9,Head of Consulting,Training weeks; T-1035 says runs continuously — owner must confirm
+M3,Test envs: retire 3 zombies + office-hours schedule; DR stays on,vm-test,2.0,2200,14769,2013,451,5.0,Head of IT,dr-failover 24/7 (T-1094); release freezes (T-1204) suspend schedule
+M4,Prod platform autoscaling 20 to min 8 nodes outside protection windows,dp-prod,3.0,3300,21815,4879,439,4.9,Head of Consulting,Never in month-end/year-end close ETL by 06:00 PBI 07:30 (T-1029)
+M5,Cancel ChatGPT Team (2 of 23 seats active),sub-chatgpt,0.5,550,5482,2,0,0.0,Head of Finance,Notice 30 d before 2026-11-30; move 2 active users
+M6,Right-size Copilot seats to active + 10 %,sub-copilot,1.0,1100,7320,0,0,0.0,Head of Finance,Seats per department (T-1128)
+M7,Right-size SaaS seats to active + 10 % at renewal,saas-other,2.0,2200,29975,0,0,0.0,Head of Finance,Notice periods 30-90 d; annual contracts only at renewal
+M8,Marketing classification: large to small model + batch + spend cap,ai-marketing,2.0,2200,9230,1592,366,4.0,Head of Marketing,Quality check on 500 samples; campaign peaks normal (T-1163)
+TOTAL,,all,14.5,15950,130121,17648,4409,48.7,,,
